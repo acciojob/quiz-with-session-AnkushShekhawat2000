@@ -1,34 +1,11 @@
-//your JS code here.
+// script.js
 
-// Do not change code below this line
-// This code will just display the questions to the screen
-const questions = [
-  {
-    question: "What is the capital of France?",
-    choices: ["Paris", "London", "Berlin", "Madrid"],
-    answer: "Paris",
-  },
-  {
-    question: "What is the highest mountain in the world?",
-    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"],
-    answer: "Everest",
-  },
-  {
-    question: "What is the largest country by area?",
-    choices: ["Russia", "China", "Canada", "United States"],
-    answer: "Russia",
-  },
-  {
-    question: "Which is the largest planet in our solar system?",
-    choices: ["Earth", "Jupiter", "Mars"],
-    answer: "Jupiter",
-  },
-  {
-    question: "What is the capital of Canada?",
-    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"],
-    answer: "Ottawa",
-  },
-];
+const questionsElement = document.getElementById("questions");
+const submitButton = document.getElementById("submit");
+const scoreElement = document.getElementById("score");
+
+// Initialize userAnswers array with default values or from session storage
+let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || new Array(questions.length).fill(null);
 
 // Display the quiz questions and choices
 function renderQuestions() {
@@ -37,6 +14,7 @@ function renderQuestions() {
     const questionElement = document.createElement("div");
     const questionText = document.createTextNode(question.question);
     questionElement.appendChild(questionText);
+    
     for (let j = 0; j < question.choices.length; j++) {
       const choice = question.choices[j];
       const choiceElement = document.createElement("input");
@@ -46,11 +24,41 @@ function renderQuestions() {
       if (userAnswers[i] === choice) {
         choiceElement.setAttribute("checked", true);
       }
+      
+      // Add event listener to update userAnswers on choice selection
+      choiceElement.addEventListener("change", function() {
+        userAnswers[i] = choice;
+        sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+      });
+
       const choiceText = document.createTextNode(choice);
       questionElement.appendChild(choiceElement);
       questionElement.appendChild(choiceText);
     }
+    
     questionsElement.appendChild(questionElement);
   }
 }
+
+// Add event listener to the submit button to calculate and display the score
+submitButton.addEventListener("click", function() {
+  const score = calculateScore();
+  scoreElement.textContent = `Your score is ${score} out of 5.`;
+
+  // Store the score in local storage
+  localStorage.setItem("score", score.toString());
+});
+
+// Function to calculate the score based on user answers
+function calculateScore() {
+  let score = 0;
+  for (let i = 0; i < questions.length; i++) {
+    if (userAnswers[i] === questions[i].answer) {
+      score++;
+    }
+  }
+  return score;
+}
+
+// Initial render
 renderQuestions();
